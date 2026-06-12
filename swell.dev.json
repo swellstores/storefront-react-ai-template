@@ -11,8 +11,7 @@
         { "id": "index", "label": "Home", "url": "/" },
         { "id": "products", "label": "Shop", "url": "/products", "collection": "products" },
         { "id": "product", "label": "Product", "url": "/products/:slug", "collection": "products" }
-      ],
-      "design": { "voice": "", "audience": "", "mood": "" }
+      ]
     }
   }
 }

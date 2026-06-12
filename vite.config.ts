@@ -45,16 +45,30 @@ export default defineConfig({
     ],
   },
   optimizeDeps: {
-    // Pre-bundle SDK packages alongside React on cold start. Without this,
-    // Vite discovers SDK deps lazily (especially react/jsx-runtime) and
-    // re-optimizes mid-load, which races with the SDK already loaded and
-    // ends up giving the SDK its own React copy — breaking hooks.
-    // Trade-off: SDK source edits require `bun run build` + manual reload
-    // instead of HMR. Acceptable since SDK is a published library.
+    // Pre-bundle React-family deps so the SDK + app share the same copy
+    // even when the SDK is symlinked from a workspace.
+    //
+    // The SDK is `exclude`d below (so source edits HMR), which means Vite does
+    // NOT crawl it during the initial dep scan and never sees its transitive
+    // deps up front. Without this, those deps get discovered lazily on the
+    // first SDK import, Vite re-optimizes mid-session and reloads, and the
+    // first page load 504s on stale `.vite/deps/chunk-*.js?v=` URLs. Listing
+    // them here pre-bundles them on the cold start, so there is no re-optimize.
     include: [
       "react",
       "react-dom",
       "react-router-dom",
+      "zustand",
+      "framer-motion",
+      "swell-js",
+      "immer",
+      "clsx",
+      "tailwind-merge",
+    ],
+    // Keep the SDK out of pre-bundling so source edits propagate via HMR
+    // without needing `--force` or wiping node_modules/.vite. React dedup
+    // is handled by `resolve.dedupe` above.
+    exclude: [
       "@swell/storefront-app-sdk-core",
       "@swell/storefront-app-sdk-react",
     ],

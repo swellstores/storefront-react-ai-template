@@ -25,7 +25,8 @@ These are regenerated after the design agent finishes. Hand-edits are lost.
 | `src/sections/index.ts` | `stampRegistry` — wires generated sections into the SDK's `SectionRegistry` |
 | `theme/settings/settings.json` | populated by `addColorScheme` etc. — agent decides hex values per scheme |
 | `theme/templates/pages/*.json`, `theme/templates/layout/*.json` | populated by template/section composition tools |
-| `src/sections/<section-type>/index.tsx` + `blocks/<Block>.tsx` | `componentGenerate` LLM phase |
+| `src/sections/<section-type>/index.tsx` | `componentGenerate` — section LLM phase |
+| `src/blocks/<Block>.tsx` | `componentGenerate` — global block LLM phase (one file per unique block type, shared across sections) |
 
 ## Files that are boilerplate (don't get regenerated)
 

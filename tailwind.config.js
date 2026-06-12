@@ -1,4 +1,5 @@
 import animate from "tailwindcss-animate";
+import { SDK_TAILWIND_SAFELIST } from "@swell/storefront-app-sdk-react/tailwind";
 
 /**
  * Color tokens map 1:1 to the canonical scheme CSS variables emitted by
@@ -15,6 +16,7 @@ import animate from "tailwindcss-animate";
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  safelist: SDK_TAILWIND_SAFELIST,
   theme: {
     extend: {
       colors: {
