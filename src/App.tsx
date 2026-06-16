@@ -4,7 +4,6 @@ import {
   type PageTemplate,
 } from "@swell/storefront-app-sdk-react";
 import swellConfig from "@swell-config";
-import { Toaster } from "sonner";
 
 import { SECTIONS } from "@/sections";
 import settingsSchema from "@/settings/schema";
@@ -85,8 +84,6 @@ export default function App() {
       header={header}
       footer={footer}
       devPreview={import.meta.env.VITE_SWELL_DEV_PREVIEW === "1"}
-    >
-      <Toaster richColors closeButton />
-    </SwellStorefrontApp>
+    />
   );
 }
