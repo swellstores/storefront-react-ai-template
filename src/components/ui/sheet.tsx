@@ -6,6 +6,8 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+// see select.tsx — re-theme portaled content to its originating section's scheme
+import { useColorScheme } from "@swell/storefront-app-sdk-react/theme"
 
 const Sheet = SheetPrimitive.Root
 
@@ -61,6 +63,7 @@ const SheetContent = React.forwardRef<
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
+      data-color-scheme={useColorScheme()}
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
@@ -108,7 +111,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Title
     ref={ref}
-    className={cn("text-lg font-semibold text-foreground", className)}
+    className={cn("text-title font-semibold leading-none tracking-tight text-foreground", className)}
     {...props}
   />
 ))

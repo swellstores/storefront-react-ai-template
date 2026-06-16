@@ -1,3 +1,7 @@
+/* Must precede @tailwind — pulls in the brand pairing's variable fonts plus the
+   font-family and tracking CSS variables. Stamped per-plan by applyPlan. */
+@import "./fonts.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -23,5 +27,23 @@
   body {
     margin: 0;
     padding: 0;
+  }
+
+  /* The display/heading type roles ride the brand DISPLAY family automatically
+     (body is the default family via tailwind fontFamily.sans). :where() carries
+     0 specificity, so an explicit font utility (e.g. `font-body`) always wins —
+     the agent stays font-blind but can override. */
+  :where(.text-display, .text-heading) {
+    font-family: var(--font-display);
+  }
+
+  /* Typographic polish, agent-blind + overridable (0-specificity): balanced
+     headings (no lonely last-line word), pretty body (no orphans). */
+  :where(.text-display, .text-heading, .text-title) {
+    text-wrap: balance;
+  }
+
+  body {
+    text-wrap: pretty;
   }
 }

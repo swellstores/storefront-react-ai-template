@@ -84,6 +84,7 @@ export default function App() {
       defaultLocale={defaultLocale}
       header={header}
       footer={footer}
+      devPreview={import.meta.env.VITE_SWELL_DEV_PREVIEW === "1"}
     >
       <Toaster richColors closeButton />
     </SwellStorefrontApp>

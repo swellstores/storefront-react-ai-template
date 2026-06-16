@@ -4,6 +4,15 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+// Every variant pairs a background with the FOREGROUND OF THE SAME canonical
+// role (background↔text, surface↔text, button↔button_label, …) — including on
+// hover. Stock shadcn `outline`/`ghost` hover to `bg-accent text-accent-foreground`,
+// but `accent` has no foreground role here (the alias points it at
+// `button_label`, a DIFFERENT role's label). That cross-role pair only happens
+// to read while the bg is accent; the moment a caller overrides the hover bg
+// (e.g. a brand button's `hover:bg-surface`) the label-colored text strands on
+// a mismatched background and goes invisible. So outline/ghost hover to a
+// surface↔text pair, which the plan's contrast check guarantees in light + dark.
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
@@ -13,10 +22,10 @@ const buttonVariants = cva(
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-background text-foreground hover:bg-surface hover:text-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-surface hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
