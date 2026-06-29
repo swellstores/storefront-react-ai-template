@@ -1,6 +1,9 @@
 /* Must precede @tailwind — pulls in the brand pairing's variable fonts plus the
    font-family and tracking CSS variables. Stamped per-plan by applyPlan. */
 @import "./fonts.css";
+/* The look's concrete design foundation (type ramp / spacing / elevation / radius
+   / weights) as :root vars. Stamped per-plan by applyPlan; empty by default. */
+@import "./foundation.css";
 
 @tailwind base;
 @tailwind components;
