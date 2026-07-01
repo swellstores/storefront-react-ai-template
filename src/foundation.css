@@ -1,0 +1,5 @@
+/* The look's concrete design foundation as :root CSS vars (type ramp, spacing,
+   elevation, radius, weights). Stamped per-plan by applyBrand when the chosen
+   look carries a `foundation`. This file is the sole source for all design
+   foundation vars including --radius; the SDK's DesignTokenManager has been
+   removed (D-07). */

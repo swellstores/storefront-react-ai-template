@@ -1,9 +1,8 @@
 import type { SettingsSchema } from "@swell/storefront-app-sdk-react";
 
-// Base scaffold schema. `applyPlan` + `writeSettingsSchema` (vibesdk) regenerate
-// this file per the plan during codegen — color roles and the design-token
-// defaults are driven by the chosen style preset. This base mirrors the
-// system defaults (the `contemporary` preset).
+// Base scaffold schema. `writeSettingsSchema` regenerates this file per the plan
+// during codegen — color roles and font/motion defaults are driven by the
+// chosen look. This base mirrors the system defaults (the `workshop` look).
 const schema = [
   {
     name: "Colors",
@@ -50,73 +49,11 @@ const schema = [
           { label: "Magazine", value: "magazine" },
         ],
       },
-      {
-        type: "select",
-        id: "type_scale",
-        label: "Type scale",
-        default: "balanced",
-        help: "How much headings stand out from body text.",
-        options: [
-          { label: "Modest", value: "modest" },
-          { label: "Balanced", value: "balanced" },
-          { label: "Dramatic", value: "dramatic" },
-        ],
-      },
-      {
-        type: "select",
-        id: "type_weight",
-        label: "Heading weight",
-        default: "bold",
-        options: [
-          { label: "Regular", value: "regular" },
-          { label: "Bold", value: "bold" },
-          { label: "Heavy", value: "heavy" },
-        ],
-      },
-    ],
-  },
-  {
-    name: "Shape",
-    settings: [
-      {
-        type: "select",
-        id: "radius",
-        label: "Corners",
-        default: "rounded",
-        options: [
-          { label: "Sharp", value: "sharp" },
-          { label: "Rounded", value: "rounded" },
-          { label: "Pill", value: "pill" },
-        ],
-      },
-      {
-        type: "select",
-        id: "edges",
-        label: "Borders & shadows",
-        default: "soft",
-        options: [
-          { label: "Flat", value: "flat" },
-          { label: "Hairline", value: "hairline" },
-          { label: "Soft", value: "soft" },
-          { label: "Brutalist", value: "brutalist" },
-        ],
-      },
     ],
   },
   {
     name: "Layout & Motion",
     settings: [
-      {
-        type: "select",
-        id: "density",
-        label: "Spacing",
-        default: "normal",
-        options: [
-          { label: "Compact", value: "compact" },
-          { label: "Normal", value: "normal" },
-          { label: "Spacious", value: "spacious" },
-        ],
-      },
       {
         type: "select",
         id: "motion_feel",
