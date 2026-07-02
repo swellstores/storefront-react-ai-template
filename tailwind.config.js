@@ -4,14 +4,23 @@ import { SDK_TAILWIND_SAFELIST } from "@swell/storefront-app-sdk-react/tailwind"
 /**
  * Color tokens map 1:1 to the canonical scheme CSS variables emitted by
  * @swell/storefront-app-sdk-core's ColorSchemeManager. The plan's design
- * agent declares the same 10 roles per color_scheme; values flow through
- * `[data-color-scheme="..."]` blocks at runtime. shadcn aliases (primary,
- * secondary, card, popover, accent, muted, foreground, input, ring) bind
- * to those scheme roles so shadcn primitives inherit the brand.
+ * agent declares the same 7 pairs + border per color_scheme; values flow
+ * through `[data-color-scheme="..."]` blocks at runtime. shadcn aliases
+ * (primary, secondary, card, popover, accent, muted, foreground, input,
+ * ring, destructive) bind to those scheme roles so shadcn primitives
+ * inherit the brand.
  *
  * stampTailwindConfig regenerates this file after each plan run, picking up
  * brand-extension roles (any keys the design agent adds beyond the canonical
- * 10) as auto-exposed Tailwind classes alongside the shadcn slots.
+ * set) as auto-exposed Tailwind classes alongside the shadcn slots.
+ *
+ * Three shadcn slots are SERVICE SLOTS derived per a per-look policy
+ * (calm|loud) rather than a fixed role — this file mirrors the DEFAULT look
+ * (`gallery`, calm): interactive `--accent`/`--accent-foreground` read
+ * `muted`/`muted_label` (quiet hover), `--ring` is always `accent` (the
+ * focus ring is a legitimate brand moment), `--input` reads `border`.
+ * `destructive`/`destructive-foreground` map to the palette
+ * `destructive`/`destructive_label` roles — no hardcoded oklch literal.
  */
 export default {
   darkMode: ["class"],
@@ -20,42 +29,47 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Custom role aliases — 1:1 with the canonical scheme roles.
         background: "var(--background)",
         text: "var(--text)",
         surface: "var(--surface)",
+        "surface-label": "var(--surface-label)",
         muted: "var(--muted)",
+        "muted-label": "var(--muted-label)",
         border: "var(--border)",
         button: "var(--button)",
         "button-label": "var(--button-label)",
         "secondary-button": "var(--secondary-button)",
         "secondary-button-label": "var(--secondary-button-label)",
         accent: "var(--accent)",
+        "accent-label": "var(--accent-label)",
+        destructive: "var(--destructive)",
+        "destructive-label": "var(--destructive-label)",
 
+        // shadcn semantic slots — see buildShadcnAliases in
+        // packages/storefront-gen/src/storefront/codegen/stamp/tailwindConfig.ts.
         foreground: "var(--text)",
-        "muted-foreground": "var(--muted)",
-        "accent-foreground": "var(--button-label)",
-        primary: {
-          DEFAULT: "var(--button)",
-          foreground: "var(--button-label)",
-        },
-        secondary: {
-          DEFAULT: "var(--secondary-button)",
-          foreground: "var(--secondary-button-label)",
-        },
-        card: {
-          DEFAULT: "var(--surface)",
-          foreground: "var(--text)",
-        },
-        popover: {
-          DEFAULT: "var(--surface)",
-          foreground: "var(--text)",
-        },
+        primary: "var(--button)",
+        "primary-foreground": "var(--button-label)",
+        secondary: "var(--secondary-button)",
+        "secondary-foreground": "var(--secondary-button-label)",
+        card: "var(--surface)",
+        "card-foreground": "var(--surface-label)",
+        popover: "var(--surface)",
+        "popover-foreground": "var(--surface-label)",
+        // Interactive service slot — DEFAULT look (gallery) is calm: reads
+        // muted/muted_label for a quiet hover, not the brand accent. This
+        // deliberately overrides the "accent" custom-role alias above (the
+        // brand accent stays reachable via the "accent" role for
+        // brand-declared usage; shadcn's --accent is a distinct interactive
+        // service slot, matching buildShadcnAliases's key-collision order).
+        accent: "var(--muted)",
+        "accent-foreground": "var(--muted-label)",
+        "muted-foreground": "var(--muted-label)",
+        // Service slots: input reads border; ring is always the brand accent.
         input: "var(--border)",
-        ring: "var(--button)",
-        destructive: {
-          DEFAULT: "oklch(0.55 0.22 27)",
-          foreground: "#fff",
-        },
+        ring: "var(--accent)",
+        "destructive-foreground": "var(--destructive-label)",
       },
       borderRadius: {
         lg: "var(--radius, 0.5rem)",
