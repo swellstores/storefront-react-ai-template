@@ -1,8 +1,12 @@
 {
   "page": {
-    "archetype": "product-detail",
     "title": "",
     "description": ""
   },
-  "sections": []
+  "sections": [
+    {
+      "type": "product-detail",
+      "purpose": "a product detail page — show the product and let the visitor buy: name, price, media, options, add to cart"
+    }
+  ]
 }

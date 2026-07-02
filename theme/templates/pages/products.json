@@ -1,8 +1,12 @@
 {
   "page": {
-    "archetype": "product-list",
     "title": "",
     "description": ""
   },
-  "sections": []
+  "sections": [
+    {
+      "type": "product-list",
+      "purpose": "the product listing — browse the catalog as a grid of products with filters, sort, and pagination"
+    }
+  ]
 }

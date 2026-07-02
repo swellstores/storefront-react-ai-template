@@ -1,3 +1,8 @@
 {
-  "sections": []
+  "sections": [
+    {
+      "type": "footer",
+      "purpose": "the global footer — secondary navigation links and legal/utility text"
+    }
+  ]
 }

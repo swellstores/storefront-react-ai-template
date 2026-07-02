@@ -1,3 +1,8 @@
 {
-  "sections": []
+  "sections": [
+    {
+      "type": "header",
+      "purpose": "the global header — brand mark, primary navigation, cart access, and locale/currency switchers"
+    }
+  ]
 }
