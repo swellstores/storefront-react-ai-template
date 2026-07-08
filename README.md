@@ -30,7 +30,7 @@ These are regenerated after the design agent finishes. Hand-edits are lost.
 
 ## Files that are boilerplate (don't get regenerated)
 
-- `src/App.tsx`, `src/main.tsx`, `src/pages/*` — page-archetype dispatch wiring; modify only the archetype set itself if pipeline gains new archetypes.
+- `src/App.tsx`, `src/main.tsx` — app entry + routing wiring: reads the page registry from `swell.json` (`storefront.theme.pages`: id/url/collection), globs the per-page template JSONs, and hands URL-routed `PageDeclaration`s to `SwellStorefrontApp`. Routing is URL-based — there are no page archetypes.
 - `src/components/ui/*` — shadcn primitives the codegen LLM imports from `@/components/ui/<name>`. The validator only allow-lists imports for primitives that exist here, so the full set must stay even when no section imports a particular one yet.
 - `src/components/ErrorBoundary.tsx`, `src/lib/utils.ts` — shared utilities.
 - `worker/*` — Cloudflare Worker entrypoint that injects `window.__SWELL__` from request headers. Marked "STRICTLY forbidden" to edit; codegen must not touch.
