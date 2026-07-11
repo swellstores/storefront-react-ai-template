@@ -15,10 +15,13 @@ declare module "@swell-config" {
           url: string;
           collection?: string;
         }>;
-        design?: {
-          voice: string;
-          audience: string;
-          mood: string;
+        design: {
+          offering: {
+            products: string;
+            audience: string;
+          };
+          look: string;
+          palette: string[];
         };
       };
     };
