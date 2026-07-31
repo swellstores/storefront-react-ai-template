@@ -1,33 +1,15 @@
-// Making changes to this file is **STRICTLY** forbidden.
-
-import { Hono } from "hono";
-import { logger } from "hono/logger";
-
 import { Env, extractSwellConfig } from "./swell";
 
-const app = new Hono<{ Bindings: Env }>();
-
-app.use("*", logger());
-
-app.notFound((c) => c.json({ success: false, error: "Not Found" }, 404));
-app.onError((err, c) => {
-  console.error(`[ERROR] ${err}`);
-  return c.json({ success: false, error: "Internal Server Error" }, 500);
-});
-
-console.log(`Server is running`);
-
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+  async fetch(request: Request, env: Env) {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    // API routes go through Hono
     if (pathname.startsWith("/api/")) {
-      return app.fetch(request, env, ctx);
+      return Response.json({ success: false, error: "Not Found" }, { status: 404 });
     }
 
-    // Static assets: fetch from ASSETS binding, inject __SWELL__ into HTML
+    // Static assets: fetch from ASSETS binding, inject public Swell config.
     const assetResponse = await env.ASSETS.fetch(request);
 
     const contentType = assetResponse.headers.get("content-type") || "";
@@ -38,7 +20,7 @@ export default {
     // Extract public config from Swell platform headers, inject into HTML
     const swellConfig = extractSwellConfig(request);
 
-    const html = await assetResponse.text();
+    const html = stripViteDevClient(await assetResponse.text());
     const injectedHtml = html.replace(
       "</head>",
       `<script>window.__SWELL__=${JSON.stringify(swellConfig)};</script>\n</head>`,
@@ -53,3 +35,7 @@ export default {
     });
   },
 } satisfies ExportedHandler<Env>;
+
+function stripViteDevClient(html: string) {
+  return html.replace(/\s*<script\b[^>]*\bsrc=["']\/@vite\/client["'][^>]*><\/script>\s*/g, "\n");
+}

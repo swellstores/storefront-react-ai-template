@@ -1,31 +1,38 @@
-import { createStorefront } from "@swell/storefront-app-sdk-react";
-import type { PageTemplate } from "@swell/storefront-app-sdk-react";
-import { SECTIONS } from "@/sections";
-import settingsSchema from "@/settings/schema";
-import settingsValues from "@theme/settings/settings.json";
-import footer from "@theme/templates/layout/footer.json";
-import header from "@theme/templates/layout/header.json";
-import swellConfig from "@swell-config";
+import { Route, Routes } from "react-router-dom";
 
-// import.meta.glob is bundler-bound (Vite resolves it at transform time
-// against THIS file's location). The SDK cannot do this glob on behalf of
-// the app — keep the glob calls here, pass results to createStorefront().
-const pageTemplateModules = import.meta.glob<PageTemplate>(
-  "@theme/templates/pages/*.json",
-  { eager: true, import: "default" },
-);
-const localeModules = import.meta.glob<Record<string, unknown>>(
-  "@theme/locales/*.json",
-  { eager: true, import: "default" },
-);
+import { useStorefront } from "@/commerce";
+import { NotFound } from "@/fallbacks";
 
-export default createStorefront({
-  swellConfig,
-  pageTemplateModules,
-  localeModules,
-  sections: SECTIONS,
-  settingsSchema,
-  settingsValues,
-  header,
-  footer,
-});
+function Starter() {
+  const { status, error } = useStorefront();
+
+  return (
+    <main className="grid min-h-screen place-items-center px-6 py-20 text-center">
+      <div className="max-w-xl">
+        <p className="text-sm uppercase tracking-[0.2em] opacity-60">Swell Storefront</p>
+        <h1 className="mt-4 text-4xl font-semibold">Ready for storefront generation</h1>
+        <p className="mt-4 opacity-70">
+          Replace this starter route with the generated React storefront. The commerce hooks live in{" "}
+          <code>src/commerce</code>.
+        </p>
+
+        {status === "unconfigured" && (
+          <p className="mt-6 text-sm opacity-60">
+            Waiting for Swell platform headers from the storefront proxy.
+          </p>
+        )}
+
+        {status === "error" && <p className="mt-6 text-sm text-red-600">{error?.message}</p>}
+      </div>
+    </main>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Starter />} />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+}

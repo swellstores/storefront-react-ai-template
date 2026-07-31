@@ -1,52 +1,35 @@
-/* Must precede @tailwind — pulls in the brand pairing's variable fonts plus the
-   font-family and tracking CSS variables. Stamped per-plan by applyPlan. */
-@import "./fonts.css";
-/* The look's concrete design foundation (type ramp / spacing / elevation / radius
-   / weights) as :root vars. Stamped per-plan by applyPlan; empty by default. */
-@import "./foundation.css";
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "./design.css";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../tailwind.config.js";
 
-[data-section-id] {
-  background-color: var(--background);
-  color: var(--text);
-  border-color: var(--border);
-}
+@custom-variant dark (&:is(.dark *));
 
 @layer base {
   * {
     box-sizing: border-box;
-  }
-
-  html {
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    @apply border-border outline-ring/50;
   }
 
   html,
   body {
     margin: 0;
+    min-height: 100%;
     padding: 0;
   }
 
-  /* The display/heading type roles ride the brand DISPLAY family automatically
-     (body is the default family via tailwind fontFamily.sans). :where() carries
-     0 specificity, so an explicit font utility (e.g. `font-body`) always wins —
-     the agent stays font-blind but can override. */
-  :where(.text-display, .text-heading) {
-    font-family: var(--font-display);
-  }
-
-  /* Typographic polish, agent-blind + overridable (0-specificity): balanced
-     headings (no lonely last-line word), pretty body (no orphans). */
-  :where(.text-display, .text-heading, .text-title) {
-    text-wrap: balance;
-  }
-
   body {
-    text-wrap: pretty;
+    @apply bg-background text-foreground;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  html {
+    @apply font-sans;
   }
 }

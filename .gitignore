@@ -7,4 +7,5 @@ dist
 .env.*
 !.env.example
 .vite
+.eslintcache
 tsconfig.tsbuildinfo
