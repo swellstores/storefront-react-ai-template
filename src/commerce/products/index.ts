@@ -9,6 +9,7 @@ export {
   type ProductSelection,
   type PurchaseOptionSelection,
 } from "./selection";
+export { getProductImage, getProductImageUrl, getProductPrice } from "../rendering";
 
 export type {
   Image,

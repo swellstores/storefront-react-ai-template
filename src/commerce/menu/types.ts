@@ -15,8 +15,10 @@ export interface Menu {
 
 export interface ResolvedMenuItem {
   name: string;
+  type: string;
   href: string;
   children: ResolvedMenuItem[];
+  items: ResolvedMenuItem[];
 }
 
 export interface ResolvedMenu {

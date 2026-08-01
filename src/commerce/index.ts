@@ -14,3 +14,4 @@ export * from "./currency";
 export * from "./locale";
 export * from "./menu";
 export * from "./products";
+export * from "./rendering";

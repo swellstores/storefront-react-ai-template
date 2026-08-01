@@ -3,6 +3,7 @@ import type { Product } from "swell-js";
 
 import { buildCartItemPayload } from "../src/commerce/cart";
 import { normalizeMenus } from "../src/commerce/menu/normalize";
+import { getProductImageUrl, getProductPrice } from "../src/commerce/rendering";
 import { stableQueryKey } from "../src/commerce/query";
 
 describe("commerce helpers", () => {
@@ -30,14 +31,44 @@ describe("commerce helpers", () => {
 
     expect(menus.header?.items[0]).toEqual({
       name: "Shoes",
+      type: "category",
       href: "/categories/shoes",
       children: [
         {
           name: "Runner",
+          type: "product",
           href: "/products/runner",
           children: [],
+          items: [],
         },
       ],
+      items: [
+        {
+          name: "Runner",
+          type: "product",
+          href: "/products/runner",
+          children: [],
+          items: [],
+        },
+      ],
+    });
+  });
+
+  test("reads render-friendly product image and price details", () => {
+    const product = {
+      name: "Runner",
+      price: 120,
+      sale_price: 90,
+      currency: "USD",
+      images: [{ file: { url: "https://cdn.test/runner.jpg" } }],
+    } satisfies Product;
+
+    expect(getProductImageUrl(product)).toBe("https://cdn.test/runner.jpg");
+    expect(getProductPrice(product)).toEqual({
+      price: 120,
+      salePrice: 90,
+      currency: "USD",
+      hasSale: true,
     });
   });
 

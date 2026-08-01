@@ -43,11 +43,16 @@ function normalizeHref(href: string): string {
 }
 
 function resolveItems(items: MenuItem[]): ResolvedMenuItem[] {
-  return items.map((item) => ({
-    name: item.name,
-    href: normalizeHref(resolveHref(item)),
-    children: resolveItems(item.items ?? []),
-  }));
+  return items.map((item) => {
+    const children = resolveItems(item.items ?? []);
+    return {
+      name: item.name,
+      type: item.type,
+      href: normalizeHref(resolveHref(item)),
+      children,
+      items: children,
+    };
+  });
 }
 
 function pickMenuList(value: unknown): Menu[] {
