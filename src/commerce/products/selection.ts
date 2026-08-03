@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Product, ProductOption } from "swell-js";
 
 import { swell } from "../client";
-
-export type PurchaseOptionSelection =
-  | { type: "standard" }
-  | { type: "subscription"; plan_id: string };
+import {
+  getDefaultPurchaseOption,
+  type PurchaseOptionSelection,
+} from "./purchaseOptions";
 
 export function getActiveOptions(product: Product): ProductOption[] {
   return product.options?.filter((option) => option.active !== false) ?? [];
@@ -26,15 +26,6 @@ export function getDefaultOptions(product: Product): Record<string, string> {
   }
 
   return selection;
-}
-
-export function getDefaultPurchaseOption(product: Product): PurchaseOptionSelection {
-  const plans = product.purchase_options?.subscription?.plans ?? [];
-  if (!product.purchase_options?.standard && plans[0]?.id) {
-    return { type: "subscription", plan_id: plans[0].id };
-  }
-
-  return { type: "standard" };
 }
 
 export interface ProductSelection {

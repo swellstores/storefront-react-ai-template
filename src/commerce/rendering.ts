@@ -33,6 +33,10 @@ export function getProductImage(
   return imageDetails(image, product?.name);
 }
 
+export function getProductImages(product: Product | null | undefined): CommerceImage[] {
+  return normalizeImages(product?.images as SwellImage[] | undefined, product?.name);
+}
+
 export function getProductImageUrl(
   product: Product | null | undefined,
   index = 0,
@@ -46,6 +50,10 @@ export function getCategoryImage(
 ): CommerceImage | null {
   const image = category?.images?.[index] as SwellImage | undefined;
   return imageDetails(image, category?.name);
+}
+
+export function getCategoryImages(category: Category | null | undefined): CommerceImage[] {
+  return normalizeImages(category?.images as SwellImage[] | undefined, category?.name);
 }
 
 export function getCategoryImageUrl(
@@ -82,6 +90,15 @@ function imageDetails(
     ...(typeof image.file?.width === "number" ? { width: image.file.width } : {}),
     ...(typeof image.file?.height === "number" ? { height: image.file.height } : {}),
   };
+}
+
+function normalizeImages(
+  images: SwellImage[] | undefined,
+  fallbackAlt: string | null | undefined,
+): CommerceImage[] {
+  return (images ?? [])
+    .map((image) => imageDetails(image, fallbackAlt))
+    .filter((image): image is CommerceImage => image !== null);
 }
 
 function numberOrNull(value: unknown): number | null {
