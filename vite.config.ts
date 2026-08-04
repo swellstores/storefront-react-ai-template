@@ -31,7 +31,6 @@ export default defineConfig({
       "react-dom",
       "react-router-dom",
       "zustand",
-      "framer-motion",
       "swell-js",
       "clsx",
       "tailwind-merge",
