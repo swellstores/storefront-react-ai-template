@@ -138,12 +138,20 @@ Contrast
 - MUST use one depth technique per storefront (border OR shadow OR
   background shift), never mixed.
 
+Pull-quotes & blockquotes
+- A quote uses EXACTLY ONE emphasis device: EITHER a vertical rule with the
+  text left-aligned, OR centred text with no rule. NEVER both (no vertical
+  rule on centred text, no left rule paired with centring).
+- MUST carry an attribution line (source/author), visually subordinate to
+  the quote (smaller and/or muted), not a bare floating quote.
+
 Banned defaults (conformance)
 zero-gap icon+text · unpadded bordered boxes · single-item grids ·
 full-width paragraphs · literal `#000`/`#FFF` (or any literal colour) ·
 one-off spacing values · asymmetric badge padding · adjacent hard divides ·
 mixed depth techniques · text over imagery without scrim · more than two
-typefaces · lone image in a void · irrelevant stock imagery.
+typefaces · lone image in a void · irrelevant stock imagery ·
+blockquote with both a rule and centred text · quote with no attribution.
 
 ## Taste
 
