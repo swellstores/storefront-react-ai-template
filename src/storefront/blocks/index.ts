@@ -45,6 +45,7 @@ export {
 export { ContentActions, type ContentActionsProps } from "./content/actions";
 export { ContentFeature, type ContentFeatureProps } from "./content/feature";
 export { ContentHeader, type ContentHeaderProps } from "./content/header";
+export { ContentMarquee, type ContentMarqueeProps } from "./content/marquee";
 export { ContentMedia, type ContentMediaProps } from "./content/media";
 export { ContentQuote, type ContentQuoteProps } from "./content/quote";
 export { ContentSpecifications, type ContentSpecificationsProps } from "./content/specifications";

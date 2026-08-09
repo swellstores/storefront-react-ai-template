@@ -87,6 +87,34 @@ Properties:
 - `descriptionClassName?: string`
   Styles the description text.
 
+### ContentMarquee
+
+Renders a horizontally scrolling marquee / ticker band that repeats its
+content in a seamless loop. CSS-driven animation; honors prefers-reduced-
+motion (the band renders static, without scrolling, when reduced motion is
+requested).
+
+Properties:
+
+- `items: ReactNode[]`
+  Items rendered in sequence and repeated across the band (words, phrases, or small nodes).
+- `separator?: ReactNode`
+  Optional node rendered between items as a separator (e.g. a dot or slash).
+- `speed?: "slow" | "default" | "fast"`
+  Scroll speed preset.
+- `direction?: "left" | "right"`
+  Scroll direction.
+- `variant?: "plain" | "band"`
+  Visual band preset. "plain" scrolls on the page ground; "band" fills a full-width inverted surface.
+- `pauseOnHover?: boolean`
+  Pause the scroll while the pointer is over the band.
+- `className?: string`
+  Styles the marquee root (the clipping band).
+- `itemClassName?: string`
+  Styles each rendered item.
+- `separatorClassName?: string`
+  Styles the separator between items.
+
 ### ContentMedia
 
 Renders editorial or promotional media with an optional caption.

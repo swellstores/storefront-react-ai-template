@@ -7,7 +7,7 @@ Import from: `@/storefront/blocks`
 - [cart](cart/CLAUDE.md): CartCheckout, CartLine, CartSummary, CartTrigger
 - [category](category/CLAUDE.md): CategoryDescription, CategoryImage, CategoryName, CategoryProducts
 - [category-list](category-list/CLAUDE.md): CategoryCard
-- [content](content/CLAUDE.md): ContentActions, ContentFeature, ContentHeader, ContentMedia, ContentQuote, ContentSpecifications
+- [content](content/CLAUDE.md): ContentActions, ContentFeature, ContentHeader, ContentMarquee, ContentMedia, ContentQuote, ContentSpecifications
 - [localization](localization/CLAUDE.md): LocalizationCurrencySelector, LocalizationLocaleSelector
 - [navigation](navigation/CLAUDE.md): NavigationMenu
 - [product](product/CLAUDE.md): ProductAddToCart, ProductDescription, ProductDetails, ProductGallery, ProductName, ProductOptions, ProductPrice, ProductPurchaseOptions, ProductQuantity, ProductStock

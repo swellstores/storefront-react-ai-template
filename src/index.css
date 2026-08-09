@@ -42,6 +42,20 @@
   --shadow-sm: var(--elevation-sm);
   --shadow-md: var(--elevation-md);
   --shadow-lg: var(--elevation-lg);
+
+  /* Marquee / ticker band (ContentMarquee). Duration overridable per instance
+     via --marquee-duration. The -50% keyframe pairs with a doubled track for a
+     seamless loop. */
+  --animate-marquee: marquee var(--marquee-duration, 30s) linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
 }
 
 @layer base {
