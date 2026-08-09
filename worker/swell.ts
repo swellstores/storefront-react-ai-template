@@ -10,6 +10,12 @@
 
 export interface Env {
   ASSETS: Fetcher;
+  // Local-dev fallback: the platform proxy sets the swell-* request headers on
+  // the deployed path, but the local vite/worker preview is hit directly (no
+  // proxy), so these vars provide the same config via .dev.vars.
+  SWELL_STORE_ID?: string;
+  SWELL_PUBLIC_KEY?: string;
+  SWELL_ADMIN_URL?: string;
 }
 
 /** Public Swell config injected into HTML as window.__SWELL__. */
@@ -20,9 +26,14 @@ export interface SwellClientConfig {
 }
 
 /** Extract public Swell config from platform-injected request headers. */
-export function extractSwellConfig(request: Request): SwellClientConfig {
-  const storeId = request.headers.get("swell-store-id") || "";
-  const publicKey = request.headers.get("swell-public-key") || "";
-  const url = request.headers.get("swell-admin-url") || `https://${storeId}.swell.store`;
+export function extractSwellConfig(request: Request, env?: Env): SwellClientConfig {
+  const storeId =
+    request.headers.get("swell-store-id") || env?.SWELL_STORE_ID || "";
+  const publicKey =
+    request.headers.get("swell-public-key") || env?.SWELL_PUBLIC_KEY || "";
+  const url =
+    request.headers.get("swell-admin-url") ||
+    env?.SWELL_ADMIN_URL ||
+    `https://${storeId}.swell.store`;
   return { storeId, publicKey, url };
 }
