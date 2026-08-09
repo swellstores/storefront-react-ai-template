@@ -24,6 +24,14 @@ const HOVER_BORDER = `color-mix(in srgb, ${BLURPLE} 68%, transparent)`;
 const INTERACTIVE_SELECTOR =
   'a, button, input, select, textarea, label, summary, [role="button"], [role="link"], [contenteditable="true"]';
 const SECTION_SELECTOR = "[data-section-id]";
+// Inline text editing: authored-copy elements that may become editable, and the
+// catalog-bound slots that must NOT (product/cart text is hook-rendered — it has
+// no source literal, so the server's exactly-one-match contract can't touch it;
+// this selector is the visible affordance guard on top of that).
+const TEXT_SELECTOR =
+  "h1, h2, h3, h4, h5, h6, p, span, li, strong, em, small, blockquote, figcaption";
+const PROTECTED_SLOT_SELECTOR = '[data-slot^="product"], [data-slot^="cart"]';
+const EDIT_ORIGINAL_KEY = "swellEditOriginal";
 
 export function installEditorBridge(): void {
   if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -137,15 +145,122 @@ export function installEditorBridge(): void {
       ? (node.closest<HTMLElement>(SECTION_SELECTOR) ?? null)
       : null;
 
-  document.addEventListener("mouseover", (event) => {
-    const target = event.target;
-    if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR)) {
-      // Still track the section, but the affordance is the boundary, not the control.
+  // ── Inline text editing ───────────────────────────────────────────────────
+  // A selected section's authored-copy elements become editable on click:
+  // contentEditable → Enter/blur commits, Escape cancels+restores. On commit we
+  // keep the edited DOM optimistically and post edit-text to the parent, which
+  // relays to the ai-api edit-text route and posts edit-text-reject on failure.
+  let editingEl: HTMLElement | null = null;
+  let textCursorEl: HTMLElement | null = null;
+  let editSeq = 0;
+  const pendingEdits = new Map<string, { el: HTMLElement; original: string }>();
+
+  // The element to edit for a click/hover target: an authored-text element
+  // inside the SELECTED section, not interactive, not catalog-bound, non-empty.
+  const editableTextFrom = (node: EventTarget | null): HTMLElement | null => {
+    if (!(node instanceof Element) || !selected) return null;
+    const el = node.closest<HTMLElement>(TEXT_SELECTOR);
+    if (!el || !selected.contains(el)) return null;
+    if (el.closest(INTERACTIVE_SELECTOR)) return null;
+    if (el.closest(PROTECTED_SLOT_SELECTOR)) return null;
+    if (!(el.textContent || "").trim()) return null;
+    return el;
+  };
+
+  const stopTextEdit = (save: boolean): void => {
+    const el = editingEl;
+    if (!el) return;
+    editingEl = null;
+    el.removeAttribute("contenteditable");
+    el.style.cursor = "";
+    const original = (el.dataset[EDIT_ORIGINAL_KEY] || "").trim();
+    const next = (el.textContent || "").trim();
+    delete el.dataset[EDIT_ORIGINAL_KEY];
+    if (!save) {
+      el.textContent = original;
+      return;
     }
+    if (!next || next === original) return; // no-op
+    // Optimistic: keep the edited text; the parent posts edit-text-reject if the
+    // server can't apply it (0 / 2+ source matches), and we restore then.
+    const editId = `${Date.now()}_${editSeq++}`;
+    pendingEdits.set(editId, { el, original });
+    try {
+      window.parent.postMessage(
+        {
+          __swellEditorChrome: true,
+          action: "edit-text",
+          editId,
+          sectionId: selected?.getAttribute("data-section-id") ?? null,
+          oldText: original,
+          newText: next,
+        },
+        "*",
+      );
+    } catch {
+      el.textContent = original;
+      pendingEdits.delete(editId);
+    }
+  };
+
+  const startTextEdit = (el: HTMLElement): void => {
+    if (editingEl === el) return;
+    if (editingEl) stopTextEdit(true);
+    hovered = null;
+    reposition();
+    editingEl = el;
+    el.dataset[EDIT_ORIGINAL_KEY] = el.textContent || "";
+    el.setAttribute("contenteditable", "true");
+    el.style.cursor = "text";
+    el.focus();
+    const sel = window.getSelection?.();
+    if (sel) {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+    const cleanup = (): void => {
+      el.removeEventListener("blur", onBlur);
+      el.removeEventListener("keydown", onKey);
+    };
+    function onBlur(): void {
+      cleanup();
+      stopTextEdit(true);
+    }
+    function onKey(ev: KeyboardEvent): void {
+      if (ev.key === "Escape") {
+        ev.preventDefault();
+        cleanup();
+        stopTextEdit(false); // cancel + restore
+        el.blur();
+      } else if (ev.key === "Enter") {
+        ev.preventDefault();
+        el.blur(); // commit (single-line)
+      }
+    }
+    el.addEventListener("blur", onBlur);
+    el.addEventListener("keydown", onKey);
+  };
+
+  document.addEventListener("mouseover", (event) => {
+    if (editingEl) return; // don't move overlays / cursors mid-edit
     const section = sectionFrom(event.target);
     if (section !== hovered) {
       hovered = section;
       reposition();
+    }
+    // Editable-text affordance: a text cursor on authored copy inside the
+    // selected section. Catalog-bound text gets no cursor — visibly not editable.
+    if (textCursorEl) {
+      textCursorEl.style.cursor = "";
+      textCursorEl = null;
+    }
+    const te = editableTextFrom(event.target);
+    if (te) {
+      te.style.cursor = "text";
+      textCursorEl = te;
     }
   });
 
@@ -161,6 +276,10 @@ export function installEditorBridge(): void {
     "click",
     (event) => {
       const target = event.target;
+      // Mid-edit: clicks inside the editing element are caret placement — leave
+      // them alone (clicking outside blurs → commits via the blur handler).
+      if (editingEl && target instanceof Node && editingEl.contains(target))
+        return;
       // Interactive controls behave normally — never hijack them.
       if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR))
         return;
@@ -169,6 +288,16 @@ export function installEditorBridge(): void {
         selected = null;
         reposition();
         post(null);
+        return;
+      }
+      // Clicking authored text inside the ALREADY-selected section starts inline
+      // editing rather than re-selecting (first click selects; second edits).
+      if (section === selected) {
+        const textEl = editableTextFrom(target);
+        if (textEl) {
+          event.preventDefault();
+          startTextEdit(textEl);
+        }
         return;
       }
       // The whole outlined region (section bounds) is the click target.
@@ -189,11 +318,25 @@ export function installEditorBridge(): void {
   }
 
   window.addEventListener("message", (event) => {
-    const data = event.data as { __swellEditorChrome?: boolean; action?: string } | null;
+    const data = event.data as {
+      __swellEditorChrome?: boolean;
+      action?: string;
+      editId?: string;
+    } | null;
     if (!data || data.__swellEditorChrome !== true) return;
     if (data.action === "deselect-section") {
       selected = null;
       reposition();
+    } else if (data.action === "edit-text-reject" && data.editId) {
+      // Server couldn't apply the edit (0 / 2+ source matches) — restore the DOM
+      // so the preview never shows an edit that didn't persist.
+      const p = pendingEdits.get(data.editId);
+      if (p) {
+        p.el.textContent = p.original;
+        pendingEdits.delete(data.editId);
+      }
+    } else if (data.action === "edit-text-ack" && data.editId) {
+      pendingEdits.delete(data.editId);
     }
   });
 }
