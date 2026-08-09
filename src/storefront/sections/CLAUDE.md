@@ -73,9 +73,20 @@ Do not pass deep fields or action callbacks unless a block explicitly asks for t
     per-page arc in .agent/storefront-gen/composition.json. Never invent a role
     outside the vocabulary; if none fits, use "custom".
 - Composition role vocabulary (closed):
-    header · hero · featured-grid · product-grid · category-grid · brand-story ·
-    maker-story · pull-quote · editorial-list · spec-table · ritual-steps ·
-    ingredient-provenance · marquee · cta · footer · product-detail · custom
+    header · hero · text-hero · poster-hero · featured-grid · product-grid ·
+    product-bin · collage · category-grid · brand-story · maker-story ·
+    pull-quote · editorial-list · spec-table · ritual-steps ·
+    ingredient-provenance · statement · callout · marquee · cta · footer ·
+    product-detail · custom
+  - `text-hero` and `poster-hero` are hero variants — use them (not plain
+    `hero`) when the taste calls for a type-led hero. `text-hero` is a giant
+    display-type hero with no required image; `poster-hero` is a full-width
+    uppercase poster hero with hard edges.
+  - `product-bin` is a mixed-scale product bin (cards spanning 1×1 and 2×2
+    cells in one section); `collage` is a mixed-scale collage composition.
+  - `statement` is an oversized-type section (a single word/phrase spanning
+    the viewport); `callout` is a shaped floating annotation near a product
+    or image.
 - Editable content MUST be marked where it renders:
   - data-editable="text"  on headings, body copy, button labels
   - data-editable="image" on content imagery
