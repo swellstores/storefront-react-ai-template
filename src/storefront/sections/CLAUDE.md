@@ -172,6 +172,42 @@ mixed depth techniques · text over imagery without scrim · more than two
 typefaces · lone image in a void · irrelevant stock imagery ·
 blockquote with both a rule and centred text · quote with no attribution.
 
+## Cross-taste section patterns
+
+Techniques confirmed across multiple reference storefronts. They are
+taste-agnostic — reach for them whenever the composition calls for them, not
+only under a specific taste. All use existing blocks, primitives, and tokens.
+
+Sticky split-panel product page
+- The product page is agent-authored (App.tsx maps `/products/:slug` to a
+  page you write; there is no template-owned PDP), so its composition is
+  within your control.
+- For a rich PDP, use a two-column layout where the image/gallery column
+  scrolls normally and the info column is `sticky top-…` so the buy panel
+  stays in view as the imagery scrolls past. Give the info column its own
+  `h-fit` and a `top` offset clear of the header.
+- Keep add-to-cart, price, and stock inside the sticky column.
+
+Type-as-hero
+- A hero does not require an image or gradient. A `text-hero` — a giant
+  `font-heading` display title (optionally with a small supporting line or a
+  faint image behind the type) — is a first-class hero. Give the section
+  `data-section-role="text-hero"`.
+
+Full-height grid cells
+- A product grid may use full-height cells separated by hairline
+  `divide-border` / `border-border` rules instead of card chrome, with a
+  name/price strip pinned to the bottom of each cell (`flex flex-col`, image
+  `flex-1`, strip at the end). No borders, shadows, or rounded corners on the
+  cells — the grid reads as a dense index.
+
+Page rhythm via background fields
+- A page need not sit on one continuous background. Alternate section
+  background schemes so the page reads as stacked colour fields — e.g.
+  `bg-background` → `bg-muted` → `bg-accent` → `bg-background` down the page,
+  each section owning its scheme with the matching `-foreground` token for
+  text. Keep contrast floors (see above) on every field.
+
 ## Taste
 
 - Obey the selected taste's never-rules without exception. Do not
