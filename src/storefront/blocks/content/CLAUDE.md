@@ -23,6 +23,27 @@ Properties:
 - `showExternalIcon?: boolean`
   Controls whether external actions show a trailing external-link icon.
 
+### ContentCallout
+
+Renders a shaped floating callout — a short annotation in a blob, burst, or
+pill container placed near a product or image. CSS-driven shape via
+border-radius / clip-path; colour comes from token pairs. Use for playful
+annotations ("new!", "hand-poured", a price shout) that should read as a
+motif, not a plain label.
+
+Properties:
+
+- `children: ReactNode`
+  Callout content (short text or small nodes).
+- `shape?: "blob" | "burst" | "pill"`
+  Container shape.
+- `tone?: "primary" | "accent" | "secondary"`
+  Token colour pair for the container surface.
+- `rotate?: "none" | "left" | "right"`
+  Optional tilt applied to the callout.
+- `className?: string`
+  Styles the callout root.
+
 ### ContentFeature
 
 Renders a single feature, benefit, step, or value proposition.
@@ -86,6 +107,40 @@ Properties:
   Styles the title heading.
 - `descriptionClassName?: string`
   Styles the description text.
+
+### ContentImageMask
+
+Renders content imagery clipped to a decorative shape (scalloped, cloud, or
+arched). CSS-driven via mask/border-radius; degrades to a plain rectangle
+where the mask is unsupported. Use for playful or editorial lifestyle
+imagery that should not read as a hard rectangular crop.
+
+Properties:
+
+- `src: string`
+  Image source URL.
+- `alt: string`
+  Accessible image alternative text.
+- `shape?: "scallop" | "cloud" | "arch"`
+  Decorative shape the image is clipped to.
+- `caption?: ReactNode`
+  Optional caption rendered below the image.
+- `width?: number`
+  Intrinsic image width passed to the Image primitive.
+- `height?: number`
+  Intrinsic image height passed to the Image primitive.
+- `sizes?: string`
+  Responsive image sizes passed to the Image primitive.
+- `loading?: "eager" | "lazy"`
+  Native image loading strategy.
+- `className?: string`
+  Styles the figure root.
+- `frameClassName?: string`
+  Styles the masked image frame.
+- `imageClassName?: string`
+  Styles the image element.
+- `captionClassName?: string`
+  Styles the caption text.
 
 ### ContentMarquee
 
@@ -199,3 +254,23 @@ Properties:
   Styles each specification label.
 - `valueClassName?: string`
   Styles each specification value.
+
+### ContentStickerBadge
+
+Renders a small sticker badge for product cards and imagery — a pill, star,
+or seal carrying a short label ("new", "-20%", "bestseller"). CSS-driven
+shape; colour from token pairs. Intended to be absolutely positioned by the
+section over a card corner.
+
+Properties:
+
+- `label: ReactNode`
+  Badge label (short text or a small node).
+- `shape?: "pill" | "star" | "seal"`
+  Badge shape.
+- `tone?: "primary" | "accent" | "secondary"`
+  Token colour pair for the badge surface.
+- `rotate?: "none" | "left" | "right"`
+  Optional tilt applied to the badge.
+- `className?: string`
+  Styles the badge root.
