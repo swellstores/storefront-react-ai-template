@@ -1,26 +1,24 @@
 /**
  * Editor bridge — active ONLY when the storefront is framed inside the admin
- * editor (`?swellEmbedded=1`). It gives the editor a full section-selection
- * interaction model:
+ * editor (`?swellEmbedded=1`). It gives the editor a full section-selection +
+ * inline-text-editing interaction model:
  *
- *   hover a section's non-interactive area
- *     → softened-blurple boundary + a section-tag pill in the top-left corner
- *       (the affordance; hover ≠ selected)
- *   click a section's non-interactive area (anywhere in the outlined region)
- *     → persistent boundary + tag + postMessage select-section to the parent,
- *       which opens the RegenPopup (existing editor.js contract)
+ *   hover a section        → solid-blurple boundary + section-tag pill (top-left)
+ *   click a section        → persistent boundary + tag + select-section to the
+ *                            parent, which opens the RegenPopup
+ *   click authored text in the selected section → inline edit (contentEditable;
+ *                            Enter/blur commits, Escape cancels), posted to the
+ *                            parent → ai-api edit-text route
  *
- * Clicks on interactive elements (links, buttons, inputs, …) are left alone.
- * The blurple + softened (68% via color-mix) recipe mirrors the chrome
- * selection/tag treatment already in the admin.
+ * The boundary is a real CSS `outline` on the element itself (not a floating
+ * bordered box) so it wraps the box exactly, never breaks at the corners, works
+ * for full-bleed sections, and tracks scroll for free. Clicks on interactive
+ * controls and catalog-bound text (product/cart slots) are left alone.
  *
- * Minimal + additive: the template-side half of the section-targeting layer
- * (Vlad finding #7). A fuller design (multi-select, add-at-position, keyboard)
- * lands with that proposal.
+ * Template-side half of the section-targeting layer (Vlad finding #7).
  */
 
 const BLURPLE = "#635bff";
-const HOVER_BORDER = `color-mix(in srgb, ${BLURPLE} 68%, transparent)`;
 const INTERACTIVE_SELECTOR =
   'a, button, input, select, textarea, label, summary, [role="button"], [role="link"], [contenteditable="true"]';
 const SECTION_SELECTOR = "[data-section-id]";
@@ -32,6 +30,8 @@ const TEXT_SELECTOR =
   "h1, h2, h3, h4, h5, h6, p, span, li, strong, em, small, blockquote, figcaption";
 const PROTECTED_SLOT_SELECTOR = '[data-slot^="product"], [data-slot^="cart"]';
 const EDIT_ORIGINAL_KEY = "swellEditOriginal";
+const HL_ATTR = "data-swell-hl"; // "hover" | "selected" on the element
+const EDITING_ATTR = "data-swell-editing"; // on the element being edited
 
 export function installEditorBridge(): void {
   if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -40,25 +40,19 @@ export function installEditorBridge(): void {
   if (w.__swellEditorBridgeInstalled) return;
   w.__swellEditorBridgeInstalled = true;
 
-  const makeBox = (border: string, z: number, marker: string): HTMLDivElement => {
-    const el = document.createElement("div");
-    el.setAttribute("data-swell-editor-overlay", marker);
-    Object.assign(el.style, {
-      position: "fixed",
-      pointerEvents: "none",
-      zIndex: String(z),
-      border: `2px solid ${border}`,
-      borderRadius: "6px",
-      boxSizing: "border-box",
-      display: "none",
-      top: "0",
-      left: "0",
-      width: "0",
-      height: "0",
-    } as Partial<CSSStyleDeclaration>);
-    document.body.appendChild(el);
-    return el;
-  };
+  // Boundary = a solid-blurple outline on the element itself. `!important` beats
+  // any element outline; the negative offset on sections keeps a full-bleed
+  // boundary inside the viewport edges; the editing outline sits just outside
+  // the text and overrides the browser's default contentEditable focus ring.
+  const style = document.createElement("style");
+  style.setAttribute("data-swell-editor-style", "");
+  style.textContent = `
+    [${HL_ATTR}="hover"] { outline: 2px solid ${BLURPLE} !important; outline-offset: -2px !important; cursor: pointer; }
+    [${HL_ATTR}="selected"] { outline: 2px solid ${BLURPLE} !important; outline-offset: -2px !important; }
+    [${EDITING_ATTR}] { outline: 2px solid ${BLURPLE} !important; outline-offset: 2px !important; border-radius: 2px; cursor: text; }
+  `;
+  document.head.appendChild(style);
+
   const makeTag = (z: number, marker: string): HTMLDivElement => {
     const el = document.createElement("div");
     el.setAttribute("data-swell-editor-overlay", marker);
@@ -68,7 +62,7 @@ export function installEditorBridge(): void {
       zIndex: String(z),
       background: BLURPLE,
       color: "#ffffff",
-      font: '500 11px/1.3 ui-sans-serif, system-ui, sans-serif',
+      font: '600 11px/1.2 ui-sans-serif, system-ui, sans-serif',
       letterSpacing: "0.02em",
       padding: "2px 6px",
       borderRadius: "5px",
@@ -81,9 +75,7 @@ export function installEditorBridge(): void {
     return el;
   };
 
-  const hoverBox = makeBox(HOVER_BORDER, 2147483645, "hover-box");
   const hoverTag = makeTag(2147483646, "hover-tag");
-  const selBox = makeBox(BLURPLE, 2147483646, "sel-box");
   const selTag = makeTag(2147483647, "sel-tag");
 
   let hovered: HTMLElement | null = null;
@@ -95,38 +87,37 @@ export function installEditorBridge(): void {
     s.getAttribute("data-section-id") ||
     "section";
 
-  const place = (
-    box: HTMLDivElement,
-    tag: HTMLDivElement,
-    section: HTMLElement | null,
-  ): void => {
+  // Fixed tag pill at the section's top-left corner.
+  const placeTag = (tag: HTMLDivElement, section: HTMLElement | null): void => {
     if (!section || !section.isConnected) {
-      box.style.display = "none";
       tag.style.display = "none";
       return;
     }
     const r = section.getBoundingClientRect();
-    box.style.display = "block";
-    box.style.top = `${r.top}px`;
-    box.style.left = `${r.left}px`;
-    box.style.width = `${r.width}px`;
-    box.style.height = `${r.height}px`;
-    // Tag pill: top-left corner, detached 4px in.
     tag.textContent = labelOf(section);
     tag.style.display = "block";
     tag.style.top = `${r.top + 4}px`;
     tag.style.left = `${r.left + 4}px`;
   };
 
-  const reposition = (): void => {
-    place(selBox, selTag, selected);
-    // Don't double-draw hover over the selected section.
-    if (hovered && hovered !== selected) {
-      place(hoverBox, hoverTag, hovered);
-    } else {
-      hoverBox.style.display = "none";
-      hoverTag.style.display = "none";
-    }
+  // Outlines live on the elements, so they follow scroll natively — only the
+  // fixed tag pills need repositioning on scroll/resize.
+  const positionTags = (): void => {
+    placeTag(selTag, selected);
+    if (hovered && hovered !== selected) placeTag(hoverTag, hovered);
+    else hoverTag.style.display = "none";
+  };
+
+  // Apply the boundary outlines: exactly one selected + (a distinct) hovered.
+  const applyHighlights = (): void => {
+    document.querySelectorAll(`[${HL_ATTR}]`).forEach((el) => {
+      if (el !== selected && el !== hovered) el.removeAttribute(HL_ATTR);
+    });
+    if (selected) selected.setAttribute(HL_ATTR, "selected");
+    if (hovered && hovered !== selected) hovered.setAttribute(HL_ATTR, "hover");
+    else if (hovered && hovered === selected)
+      hovered.setAttribute(HL_ATTR, "selected");
+    positionTags();
   };
 
   const post = (sectionId: string | null): void => {
@@ -146,17 +137,11 @@ export function installEditorBridge(): void {
       : null;
 
   // ── Inline text editing ───────────────────────────────────────────────────
-  // A selected section's authored-copy elements become editable on click:
-  // contentEditable → Enter/blur commits, Escape cancels+restores. On commit we
-  // keep the edited DOM optimistically and post edit-text to the parent, which
-  // relays to the ai-api edit-text route and posts edit-text-reject on failure.
   let editingEl: HTMLElement | null = null;
   let textCursorEl: HTMLElement | null = null;
   let editSeq = 0;
   const pendingEdits = new Map<string, { el: HTMLElement; original: string }>();
 
-  // The element to edit for a click/hover target: an authored-text element
-  // inside the SELECTED section, not interactive, not catalog-bound, non-empty.
   const editableTextFrom = (node: EventTarget | null): HTMLElement | null => {
     if (!(node instanceof Element) || !selected) return null;
     const el = node.closest<HTMLElement>(TEXT_SELECTOR);
@@ -172,6 +157,7 @@ export function installEditorBridge(): void {
     if (!el) return;
     editingEl = null;
     el.removeAttribute("contenteditable");
+    el.removeAttribute(EDITING_ATTR);
     el.style.cursor = "";
     const original = (el.dataset[EDIT_ORIGINAL_KEY] || "").trim();
     const next = (el.textContent || "").trim();
@@ -181,8 +167,6 @@ export function installEditorBridge(): void {
       return;
     }
     if (!next || next === original) return; // no-op
-    // Optimistic: keep the edited text; the parent posts edit-text-reject if the
-    // server can't apply it (0 / 2+ source matches), and we restore then.
     const editId = `${Date.now()}_${editSeq++}`;
     pendingEdits.set(editId, { el, original });
     try {
@@ -207,10 +191,11 @@ export function installEditorBridge(): void {
     if (editingEl === el) return;
     if (editingEl) stopTextEdit(true);
     hovered = null;
-    reposition();
+    applyHighlights();
     editingEl = el;
     el.dataset[EDIT_ORIGINAL_KEY] = el.textContent || "";
     el.setAttribute("contenteditable", "true");
+    el.setAttribute(EDITING_ATTR, "");
     el.style.cursor = "text";
     el.focus();
     const sel = window.getSelection?.();
@@ -233,11 +218,11 @@ export function installEditorBridge(): void {
       if (ev.key === "Escape") {
         ev.preventDefault();
         cleanup();
-        stopTextEdit(false); // cancel + restore
+        stopTextEdit(false);
         el.blur();
       } else if (ev.key === "Enter") {
         ev.preventDefault();
-        el.blur(); // commit (single-line)
+        el.blur();
       }
     }
     el.addEventListener("blur", onBlur);
@@ -245,14 +230,14 @@ export function installEditorBridge(): void {
   };
 
   document.addEventListener("mouseover", (event) => {
-    if (editingEl) return; // don't move overlays / cursors mid-edit
+    if (editingEl) return;
     const section = sectionFrom(event.target);
     if (section !== hovered) {
       hovered = section;
-      reposition();
+      applyHighlights();
     }
-    // Editable-text affordance: a text cursor on authored copy inside the
-    // selected section. Catalog-bound text gets no cursor — visibly not editable.
+    // Text-cursor affordance on authored copy inside the selected section;
+    // catalog-bound text gets none — visibly not editable.
     if (textCursorEl) {
       textCursorEl.style.cursor = "";
       textCursorEl = null;
@@ -265,10 +250,11 @@ export function installEditorBridge(): void {
   });
 
   document.addEventListener("mouseout", (event) => {
+    if (editingEl) return;
     const to = (event as MouseEvent).relatedTarget;
     if (!sectionFrom(to)) {
       hovered = null;
-      reposition();
+      applyHighlights();
     }
   });
 
@@ -276,22 +262,19 @@ export function installEditorBridge(): void {
     "click",
     (event) => {
       const target = event.target;
-      // Mid-edit: clicks inside the editing element are caret placement — leave
-      // them alone (clicking outside blurs → commits via the blur handler).
       if (editingEl && target instanceof Node && editingEl.contains(target))
         return;
-      // Interactive controls behave normally — never hijack them.
       if (target instanceof Element && target.closest(INTERACTIVE_SELECTOR))
         return;
       const section = sectionFrom(target);
       if (!section) {
         selected = null;
-        reposition();
+        applyHighlights();
         post(null);
         return;
       }
-      // Clicking authored text inside the ALREADY-selected section starts inline
-      // editing rather than re-selecting (first click selects; second edits).
+      // Clicking authored text inside the already-selected section starts inline
+      // editing (first click selects; second edits).
       if (section === selected) {
         const textEl = editableTextFrom(target);
         if (textEl) {
@@ -300,21 +283,20 @@ export function installEditorBridge(): void {
         }
         return;
       }
-      // The whole outlined region (section bounds) is the click target.
       event.preventDefault();
       selected = section;
       hovered = section;
-      reposition();
+      applyHighlights();
       post(section.getAttribute("data-section-id"));
     },
     true,
   );
 
-  // Keep both overlays glued to their sections through iframe scroll + resize.
-  window.addEventListener("scroll", reposition, true);
-  window.addEventListener("resize", reposition);
+  // Outlines follow scroll natively; only the fixed tag pills need repositioning.
+  window.addEventListener("scroll", positionTags, true);
+  window.addEventListener("resize", positionTags);
   if (typeof ResizeObserver !== "undefined") {
-    new ResizeObserver(reposition).observe(document.documentElement);
+    new ResizeObserver(positionTags).observe(document.documentElement);
   }
 
   window.addEventListener("message", (event) => {
@@ -326,10 +308,8 @@ export function installEditorBridge(): void {
     if (!data || data.__swellEditorChrome !== true) return;
     if (data.action === "deselect-section") {
       selected = null;
-      reposition();
+      applyHighlights();
     } else if (data.action === "edit-text-reject" && data.editId) {
-      // Server couldn't apply the edit (0 / 2+ source matches) — restore the DOM
-      // so the preview never shows an edit that didn't persist.
       const p = pendingEdits.get(data.editId);
       if (p) {
         p.el.textContent = p.original;
