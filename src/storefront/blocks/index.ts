@@ -44,6 +44,7 @@ export {
 
 export { ContentActions, type ContentActionsProps } from "./content/actions";
 export { ContentCallout, type ContentCalloutProps } from "./content/callout";
+export { ContentEditorialIndex, type ContentEditorialIndexProps } from "./content/editorial-index";
 export { ContentFeature, type ContentFeatureProps } from "./content/feature";
 export { ContentHeader, type ContentHeaderProps } from "./content/header";
 export { ContentImageMask, type ContentImageMaskProps } from "./content/image-mask";

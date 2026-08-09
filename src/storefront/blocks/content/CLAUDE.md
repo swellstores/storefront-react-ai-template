@@ -44,6 +44,34 @@ Properties:
 - `className?: string`
   Styles the callout root.
 
+### ContentEditorialIndex
+
+Renders a collection index — a stack of label rows each separated by a
+hairline rule, with an optional trailing count or meta value (the
+footer-style index of categories or collections). Rows link when an href is
+provided. Use for editorial catalog indexes and footer navigation columns.
+
+Properties:
+
+- `items: Array<{ /** * Row label content. */ label: ReactNode; /** * Optional trailing value, such as a product count or year. */ count?: ReactNode; /** * Optional route or URL; the row renders as a link when provided. */ href?: string; }>`
+  Index rows to render.
+- `title?: ReactNode`
+  Optional heading rendered above the index.
+- `level?: HeadingLevel`
+  Semantic heading level used when title is provided.
+- `className?: string`
+  Styles the block root.
+- `titleClassName?: string`
+  Styles the optional title heading.
+- `listClassName?: string`
+  Styles the index list wrapper.
+- `rowClassName?: string`
+  Styles each index row.
+- `labelClassName?: string`
+  Styles each row label.
+- `countClassName?: string`
+  Styles each trailing count value.
+
 ### ContentFeature
 
 Renders a single feature, benefit, step, or value proposition.
