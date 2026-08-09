@@ -68,6 +68,14 @@ Do not pass deep fields or action callbacks unless a block explicitly asks for t
   - data-section-id="<stable-kebab-slug>"  (unique per section, derived
     from section purpose, stable across regenerations of the same plan)
   - data-section-type="<SectionComponentName>"
+  - data-section-role="<role>"  the section's composition role, taken from
+    the closed role vocabulary below and matching this section's entry in the
+    per-page arc in .agent/storefront-gen/composition.json. Never invent a role
+    outside the vocabulary; if none fits, use "custom".
+- Composition role vocabulary (closed):
+    header · hero · featured-grid · product-grid · category-grid · brand-story ·
+    maker-story · pull-quote · editorial-list · spec-table · ritual-steps ·
+    ingredient-provenance · marquee · cta · footer · product-detail · custom
 - Editable content MUST be marked where it renders:
   - data-editable="text"  on headings, body copy, button labels
   - data-editable="image" on content imagery
