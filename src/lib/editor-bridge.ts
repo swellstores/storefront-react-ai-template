@@ -32,6 +32,7 @@ const PROTECTED_SLOT_SELECTOR = '[data-slot^="product"], [data-slot^="cart"]';
 const EDIT_ORIGINAL_KEY = "swellEditOriginal";
 const HL_ATTR = "data-swell-hl"; // "hover" | "selected" on the element
 const EDITING_ATTR = "data-swell-editing"; // on the element being edited
+const TEXT_HINT_ATTR = "data-swell-text-hint"; // authored copy editable-on-hover
 
 export function installEditorBridge(): void {
   if (typeof window === "undefined" || typeof document === "undefined") return;
@@ -50,6 +51,9 @@ export function installEditorBridge(): void {
     [${HL_ATTR}="hover"] { outline: 2px solid ${BLURPLE} !important; outline-offset: -2px !important; cursor: pointer; }
     [${HL_ATTR}="selected"] { outline: 2px solid ${BLURPLE} !important; outline-offset: -2px !important; }
     [${EDITING_ATTR}] { outline: 2px solid ${BLURPLE} !important; outline-offset: 2px !important; border-radius: 2px; cursor: text; }
+    /* Text edit hint: deliberately subordinate to the solid section boundary —
+       a light dashed underline + I-beam, a distinct affordance class (no box). */
+    [${TEXT_HINT_ATTR}]:not([${EDITING_ATTR}]) { text-decoration-line: underline !important; text-decoration-style: dashed !important; text-decoration-color: ${BLURPLE} !important; text-decoration-thickness: 1px !important; text-underline-offset: 3px !important; cursor: text !important; }
   `;
   document.head.appendChild(style);
 
@@ -152,6 +156,27 @@ export function installEditorBridge(): void {
     return el;
   };
 
+  // Discoverability hint — decoupled from selection: any authored copy inside a
+  // section shows the editable affordance on hover (clicking still selects then
+  // edits). Same catalog/interactive exclusions as editing, so product/cart text
+  // never gets the hint.
+  const hintableTextFrom = (node: EventTarget | null): HTMLElement | null => {
+    if (!(node instanceof Element)) return null;
+    const el = node.closest<HTMLElement>(TEXT_SELECTOR);
+    if (!el || !el.closest(SECTION_SELECTOR)) return null;
+    if (el.closest(INTERACTIVE_SELECTOR)) return null;
+    if (el.closest(PROTECTED_SLOT_SELECTOR)) return null;
+    if (!(el.textContent || "").trim()) return null;
+    return el;
+  };
+
+  const clearTextHint = (): void => {
+    if (textCursorEl) {
+      textCursorEl.removeAttribute(TEXT_HINT_ATTR);
+      textCursorEl = null;
+    }
+  };
+
   const stopTextEdit = (save: boolean): void => {
     const el = editingEl;
     if (!el) return;
@@ -190,6 +215,7 @@ export function installEditorBridge(): void {
   const startTextEdit = (el: HTMLElement): void => {
     if (editingEl === el) return;
     if (editingEl) stopTextEdit(true);
+    clearTextHint();
     hovered = null;
     applyHighlights();
     editingEl = el;
@@ -236,15 +262,13 @@ export function installEditorBridge(): void {
       hovered = section;
       applyHighlights();
     }
-    // Text-cursor affordance on authored copy inside the selected section;
-    // catalog-bound text gets none — visibly not editable.
-    if (textCursorEl) {
-      textCursorEl.style.cursor = "";
-      textCursorEl = null;
-    }
-    const te = editableTextFrom(event.target);
+    // Discoverability hint on authored copy — any section, catalog text excluded.
+    // A subordinate dashed underline + I-beam, a distinct class from the solid
+    // section boundary.
+    clearTextHint();
+    const te = hintableTextFrom(event.target);
     if (te) {
-      te.style.cursor = "text";
+      te.setAttribute(TEXT_HINT_ATTR, "");
       textCursorEl = te;
     }
   });
@@ -252,6 +276,7 @@ export function installEditorBridge(): void {
   document.addEventListener("mouseout", (event) => {
     if (editingEl) return;
     const to = (event as MouseEvent).relatedTarget;
+    if (!(to instanceof Node)) clearTextHint(); // pointer left the document
     if (!sectionFrom(to)) {
       hovered = null;
       applyHighlights();
@@ -306,6 +331,12 @@ export function installEditorBridge(): void {
       editId?: string;
     } | null;
     if (!data || data.__swellEditorChrome !== true) return;
+    if (data.action === "reload") {
+      // Auto-refresh after a section regen: the chrome posts this on task
+      // completion so the edited section appears without a manual page reload.
+      window.location.reload();
+      return;
+    }
     if (data.action === "deselect-section") {
       selected = null;
       applyHighlights();
