@@ -18,7 +18,7 @@ export default {
     }
 
     // Extract public config from Swell platform headers, inject into HTML
-    const swellConfig = extractSwellConfig(request);
+    const swellConfig = extractSwellConfig(request, env);
 
     const html = stripViteDevClient(await assetResponse.text());
     const injectedHtml = html.replace(

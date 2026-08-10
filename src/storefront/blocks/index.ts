@@ -43,8 +43,13 @@ export {
 } from "./localization/locale-selector";
 
 export { ContentActions, type ContentActionsProps } from "./content/actions";
+export { ContentCallout, type ContentCalloutProps } from "./content/callout";
+export { ContentEditorialIndex, type ContentEditorialIndexProps } from "./content/editorial-index";
 export { ContentFeature, type ContentFeatureProps } from "./content/feature";
 export { ContentHeader, type ContentHeaderProps } from "./content/header";
+export { ContentImageMask, type ContentImageMaskProps } from "./content/image-mask";
+export { ContentMarquee, type ContentMarqueeProps } from "./content/marquee";
 export { ContentMedia, type ContentMediaProps } from "./content/media";
 export { ContentQuote, type ContentQuoteProps } from "./content/quote";
 export { ContentSpecifications, type ContentSpecificationsProps } from "./content/specifications";
+export { ContentStickerBadge, type ContentStickerBadgeProps } from "./content/sticker-badge";

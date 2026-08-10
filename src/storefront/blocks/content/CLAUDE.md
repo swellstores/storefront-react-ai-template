@@ -23,6 +23,55 @@ Properties:
 - `showExternalIcon?: boolean`
   Controls whether external actions show a trailing external-link icon.
 
+### ContentCallout
+
+Renders a shaped floating callout — a short annotation in a blob, burst, or
+pill container placed near a product or image. CSS-driven shape via
+border-radius / clip-path; colour comes from token pairs. Use for playful
+annotations ("new!", "hand-poured", a price shout) that should read as a
+motif, not a plain label.
+
+Properties:
+
+- `children: ReactNode`
+  Callout content (short text or small nodes).
+- `shape?: "blob" | "burst" | "pill"`
+  Container shape.
+- `tone?: "primary" | "accent" | "secondary"`
+  Token colour pair for the container surface.
+- `rotate?: "none" | "left" | "right"`
+  Optional tilt applied to the callout.
+- `className?: string`
+  Styles the callout root.
+
+### ContentEditorialIndex
+
+Renders a collection index — a stack of label rows each separated by a
+hairline rule, with an optional trailing count or meta value (the
+footer-style index of categories or collections). Rows link when an href is
+provided. Use for editorial catalog indexes and footer navigation columns.
+
+Properties:
+
+- `items: Array<{ /** * Row label content. */ label: ReactNode; /** * Optional trailing value, such as a product count or year. */ count?: ReactNode; /** * Optional route or URL; the row renders as a link when provided. */ href?: string; }>`
+  Index rows to render.
+- `title?: ReactNode`
+  Optional heading rendered above the index.
+- `level?: HeadingLevel`
+  Semantic heading level used when title is provided.
+- `className?: string`
+  Styles the block root.
+- `titleClassName?: string`
+  Styles the optional title heading.
+- `listClassName?: string`
+  Styles the index list wrapper.
+- `rowClassName?: string`
+  Styles each index row.
+- `labelClassName?: string`
+  Styles each row label.
+- `countClassName?: string`
+  Styles each trailing count value.
+
 ### ContentFeature
 
 Renders a single feature, benefit, step, or value proposition.
@@ -86,6 +135,68 @@ Properties:
   Styles the title heading.
 - `descriptionClassName?: string`
   Styles the description text.
+
+### ContentImageMask
+
+Renders content imagery clipped to a decorative shape (scalloped, cloud, or
+arched). CSS-driven via mask/border-radius; degrades to a plain rectangle
+where the mask is unsupported. Use for playful or editorial lifestyle
+imagery that should not read as a hard rectangular crop.
+
+Properties:
+
+- `src: string`
+  Image source URL.
+- `alt: string`
+  Accessible image alternative text.
+- `shape?: "scallop" | "cloud" | "arch"`
+  Decorative shape the image is clipped to.
+- `caption?: ReactNode`
+  Optional caption rendered below the image.
+- `width?: number`
+  Intrinsic image width passed to the Image primitive.
+- `height?: number`
+  Intrinsic image height passed to the Image primitive.
+- `sizes?: string`
+  Responsive image sizes passed to the Image primitive.
+- `loading?: "eager" | "lazy"`
+  Native image loading strategy.
+- `className?: string`
+  Styles the figure root.
+- `frameClassName?: string`
+  Styles the masked image frame.
+- `imageClassName?: string`
+  Styles the image element.
+- `captionClassName?: string`
+  Styles the caption text.
+
+### ContentMarquee
+
+Renders a horizontally scrolling marquee / ticker band that repeats its
+content in a seamless loop. CSS-driven animation; honors prefers-reduced-
+motion (the band renders static, without scrolling, when reduced motion is
+requested).
+
+Properties:
+
+- `items: ReactNode[]`
+  Items rendered in sequence and repeated across the band (words, phrases, or small nodes).
+- `separator?: ReactNode`
+  Optional node rendered between items as a separator (e.g. a dot or slash).
+- `speed?: "slow" | "default" | "fast"`
+  Scroll speed preset.
+- `direction?: "left" | "right"`
+  Scroll direction.
+- `variant?: "plain" | "band"`
+  Visual band preset. "plain" scrolls on the page ground; "band" fills a full-width inverted surface.
+- `pauseOnHover?: boolean`
+  Pause the scroll while the pointer is over the band.
+- `className?: string`
+  Styles the marquee root (the clipping band).
+- `itemClassName?: string`
+  Styles each rendered item.
+- `separatorClassName?: string`
+  Styles the separator between items.
 
 ### ContentMedia
 
@@ -171,3 +282,23 @@ Properties:
   Styles each specification label.
 - `valueClassName?: string`
   Styles each specification value.
+
+### ContentStickerBadge
+
+Renders a small sticker badge for product cards and imagery — a pill, star,
+or seal carrying a short label ("new", "-20%", "bestseller"). CSS-driven
+shape; colour from token pairs. Intended to be absolutely positioned by the
+section over a card corner.
+
+Properties:
+
+- `label: ReactNode`
+  Badge label (short text or a small node).
+- `shape?: "pill" | "star" | "seal"`
+  Badge shape.
+- `tone?: "primary" | "accent" | "secondary"`
+  Token colour pair for the badge surface.
+- `rotate?: "none" | "left" | "right"`
+  Optional tilt applied to the badge.
+- `className?: string`
+  Styles the badge root.
